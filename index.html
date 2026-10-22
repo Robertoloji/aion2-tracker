@@ -1,811 +1,317 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aion 2 - Organizer & Rift Tracker</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        cinzel: ['Cinzel', 'serif'],
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        aion: {
-                            bg: '#080d19',
-                            card: '#0e172a',
-                            border: '#1e293b',
-                            gold: '#dfb253',
-                            'gold-light': '#fce8a6',
-                            blue: '#1468be',
-                            cyan: '#00d8ff',
-                            purple: '#7c3aed',
-                            danger: '#ef4444'
-                        }
-                    },
-                    boxShadow: {
-                        'neon-cyan': '0 0 15px rgba(0, 216, 255, 0.25)',
-                        'neon-gold': '0 0 15px rgba(223, 178, 83, 0.25)',
-                        'card-glow': '0 4px 20px -2px rgba(14, 165, 233, 0.15)'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #080d19;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00d8ff;
-        }
-        
-        .glow-title {
-            text-shadow: 0 0 10px rgba(0, 216, 255, 0.5), 0 0 20px rgba(0, 216, 255, 0.2);
-        }
-        .glow-gold {
-            text-shadow: 0 0 10px rgba(223, 178, 83, 0.5);
-        }
-        .border-gradient {
-            border-image: linear-gradient(to bottom, #dfb253, #1e293b, #00d8ff) 1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AION 2 - Rift Tracker & Daily Hub</title>
+  <style>
+    :root {
+      --bg-dark: #0B0E14;
+      --card-bg: #151A23;
+      --accent-blue: #00D2FF;
+      --accent-purple: #9D00FF;
+      --text-main: #F0F4F8;
+      --text-dim: #8A99AD;
+      --status-open: #00FF87;
+      --status-closed: #FF0055;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222B38; padding-bottom: 15px; margin-bottom: 20px; }
+    h1 { font-size: 1.5rem; letter-spacing: 1px; color: var(--accent-blue); text-transform: uppercase; }
+    .utc-clock { font-family: monospace; font-size: 1rem; color: var(--accent-blue); background: #1A222D; padding: 6px 12px; border-radius: 6px; border: 1px solid #2A3644; }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    button { background: #1F2833; color: var(--text-main); border: 1px solid #334253; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+    button:hover { background: #2A3644; border-color: var(--accent-blue); }
+    button.active { background: var(--accent-blue); color: #000; font-weight: bold; border-color: var(--accent-blue); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid #222B38; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .card-title { font-size: 1.1rem; color: var(--accent-blue); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222B38; padding-bottom: 8px; }
+
+    /* Rifts Section */
+    .timer-display { font-size: 2.5rem; font-weight: bold; font-family: monospace; text-align: center; margin: 15px 0; color: var(--text-main); }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+    .status-open { background: rgba(0, 255, 135, 0.15); color: var(--status-open); border: 1px solid var(--status-open); }
+    .status-closed { background: rgba(255, 0, 85, 0.15); color: var(--status-closed); border: 1px solid var(--status-closed); }
+    .info-sub { font-size: 0.85rem; color: var(--text-dim); text-align: center; margin-top: 5px; }
+
+    /* Checklist Section */
+    .task-list { list-style: none; }
+    .task-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #1C2430; transition: 0.2s; }
+    .task-item:last-child { border-bottom: none; }
+    .task-item label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; font-size: 0.95rem; }
+    .task-item.completed label { text-decoration: line-through; color: var(--text-dim); }
+    .char-tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .tag-cantor { background: rgba(0, 210, 255, 0.2); color: var(--accent-blue); }
+    .tag-sorcerer { background: rgba(157, 0, 255, 0.2); color: var(--accent-purple); }
+
+    /* Boss Section */
+    .boss-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1C2430; }
+    .boss-info h4 { font-size: 0.95rem; }
+    .boss-info p { font-size: 0.8rem; color: var(--text-dim); }
+    .boss-timer { font-family: monospace; font-size: 1rem; color: var(--accent-blue); }
+
+    .progress-bar { width: 100%; height: 6px; background: #1F2833; border-radius: 3px; overflow: hidden; margin-top: 15px; }
+    .progress-fill { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.3s; }
+  </style>
 </head>
-<body class="h-full flex flex-col font-sans bg-aion-bg antialiased selection:bg-aion-cyan selection:text-slate-900">
+<body>
 
-    <!-- Header Navigation -->
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Logo & Title -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-600 via-blue-700 to-amber-500 p-[1px] flex items-center justify-center shadow-neon-cyan">
-                    <div class="w-full h-full bg-slate-950 rounded-[7px] flex items-center justify-center">
-                        <i class="fa-solid font-bold fa-ring text-aion-cyan text-lg"></i>
-                    </div>
-                </div>
-                <div>
-                    <h1 class="font-cinzel text-xl font-bold tracking-wider text-slate-100 flex items-center gap-2">
-                        AION 2 <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-aion-gold border border-amber-500/30 font-sans font-semibold">HUB HQ</span>
-                    </h1>
-                    <p class="text-[11px] text-slate-400">Rift Tracker & Daily Command Center</p>
-                </div>
-            </div>
+  <header>
+    <div>
+      <h1>AION 2 Tracker</h1>
+      <span style="font-size: 0.8rem; color: var(--text-dim);">Sincronizado con QuestLog.gg</span>
+    </div>
+    <div class="utc-clock" id="utc-clock">UTC: --:--:--</div>
+  </header>
 
-            <!-- Header Controls & Status -->
-            <div class="flex items-center gap-3 sm:gap-4">
-                <!-- Audio Toggle -->
-                <button id="toggleAudioBtn" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 transition flex items-center gap-2">
-                    <i id="audioIcon" class="fa-solid fa-volume-high text-aion-cyan"></i>
-                    <span class="hidden sm:inline" id="audioText">Audio Activo</span>
-                </button>
+  <div class="controls">
+    <button id="btn-audio" onclick="toggleAudio()">🔊 Audio: Desactivado</button>
+    <button id="btn-notif" onclick="requestNotifPermission()">🔔 Notificaciones</button>
+  </div>
 
-                <!-- Web Notification Toggle -->
-                <button id="toggleNotifBtn" onclick="requestNotificationPermission()" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 transition flex items-center gap-2">
-                    <i id="notifIcon" class="fa-solid fa-bell text-amber-400"></i>
-                    <span class="hidden sm:inline" id="notifText">Avisos Web</span>
-                </button>
-
-                <!-- Server Time Clock -->
-                <div class="hidden md:flex flex-col text-right pl-3 border-l border-slate-800">
-                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Hora del Servidor (UTC)</span>
-                    <span id="serverTime" class="font-mono text-sm font-semibold text-aion-gold">00:00:00</span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- LEFT COLUMN: Rifts & World Bosses (7 Cols) -->
-        <section class="lg:col-span-7 flex flex-col gap-6">
-            
-            <!-- Spacetime Rift Hero Card -->
-            <div class="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-cyan-950/40 p-5 sm:p-6 shadow-neon-cyan">
-                <div class="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-aion-cyan">
-                            <i class="fa-solid fa-dharmachakra text-2xl animate-spin" style="animation-duration: 12s;"></i>
-                        </div>
-                        <div>
-                            <span class="text-xs font-semibold text-aion-cyan uppercase tracking-wider">Evento Global</span>
-                            <h2 class="font-cinzel text-xl sm:text-2xl font-bold text-slate-100">Grietas Espacio-Tiempo</h2>
-                        </div>
-                    </div>
-                    <div id="riftBadge" class="self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span id="riftStatusText">Calculando...</span>
-                    </div>
-                </div>
-
-                <!-- Rift Timer Box -->
-                <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="text-center sm:text-left">
-                        <p class="text-xs text-slate-400 mb-0.5">Siguiente Apertura de Grieta</p>
-                        <p id="riftNextSchedule" class="text-xs text-slate-300 font-mono">Horarios: Cada 2 horas (P. ej: 12:00, 14:00...)</p>
-                    </div>
-                    <div class="text-center sm:text-right">
-                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Tiempo Restante</span>
-                        <span id="riftCountdown" class="font-mono text-2xl sm:text-3xl font-extrabold text-aion-cyan glow-title">00:00:00</span>
-                    </div>
-                </div>
-
-                <!-- Rift Quick Info -->
-                <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-400">
-                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800/80 text-center">
-                        <span class="block text-slate-500 text-[10px]">Duración Abierta</span>
-                        <span class="font-medium text-slate-200">30 Minutos</span>
-                    </div>
-                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800/80 text-center">
-                        <span class="block text-slate-500 text-[10px]">Límite de Jugadores</span>
-                        <span class="font-medium text-slate-200">24 por Grieta</span>
-                    </div>
-                    <div class="col-span-2 sm:col-span-1 bg-slate-900/50 p-2 rounded border border-slate-800/80 text-center">
-                        <span class="block text-slate-500 text-[10px]">Recompensa Clave</span>
-                        <span class="font-medium text-aion-gold">Puntos PvP / Briznas</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- World Bosses Header & Selector Filter -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h2 class="font-cinzel text-lg font-bold text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-dragon text-aion-gold"></i> Jefes de Mapa / World Bosses
-                    </h2>
-                    <p class="text-xs text-slate-400">Tiempos de respawn y estados en tiempo real</p>
-                </div>
-                <!-- Filter Buttons -->
-                <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
-                    <button onclick="filterBosses('all')" id="btnFilterAll" class="px-2.5 py-1 rounded bg-slate-800 text-slate-100 font-medium transition">Todos</button>
-                    <button onclick="filterBosses('active')" id="btnFilterActive" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 transition">Spawneados</button>
-                    <button onclick="filterBosses('soon')" id="btnFilterSoon" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 transition">&lt; 30 min</button>
-                </div>
-            </div>
-
-            <!-- Boss Cards Grid -->
-            <div id="bossesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Dynamic Boss Cards Rendered via JS -->
-            </div>
-
-        </section>
-
-        <!-- RIGHT COLUMN: Daily Checklist & Tasks (5 Cols) -->
-        <section class="lg:col-span-5 flex flex-col gap-6">
-
-            <!-- Daily Progress Card -->
-            <div class="rounded-2xl border border-amber-500/20 bg-slate-900/80 p-5 shadow-neon-gold backdrop-blur-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <span class="text-[10px] uppercase tracking-wider font-bold text-aion-gold block">Progreso Diario</span>
-                        <h2 class="font-cinzel text-lg font-bold text-slate-100">Checklist de Tareas</h2>
-                    </div>
-                    <div class="text-right">
-                        <span id="progressPercentage" class="font-mono text-2xl font-black text-aion-gold glow-gold">0%</span>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800 mb-3">
-                    <div id="progressBar" class="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-aion-cyan rounded-full transition-all duration-500 w-0"></div>
-                </div>
-
-                <!-- Server Reset Banner -->
-                <div class="flex items-center justify-between text-xs text-slate-400 bg-slate-950/60 px-3 py-2 rounded-lg border border-slate-800">
-                    <span class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-rotate-left text-aion-cyan"></i> Reset diario del servidor:
-                    </span>
-                    <span id="resetCountdown" class="font-mono text-slate-200 font-semibold">00:00:00</span>
-                </div>
-            </div>
-
-            <!-- Daily Tasks Container -->
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 flex flex-col gap-4 flex-1">
-                
-                <!-- Task Actions Bar -->
-                <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                    <span id="completedCount" class="text-xs text-slate-400 font-medium">0 / 0 Completadas</span>
-                    
-                    <div class="flex items-center gap-2">
-                        <button onclick="resetAllTasks()" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1">
-                            <i class="fa-solid fa-arrows-rotate"></i> Reiniciar
-                        </button>
-                        <button onclick="openAddTaskModal()" class="px-2.5 py-1 text-xs rounded bg-amber-500/20 hover:bg-amber-500/30 text-aion-gold border border-amber-500/40 transition font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> Añadir
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Filter Categories -->
-                <div class="flex items-center gap-1 overflow-x-auto pb-1 text-xs scrollbar-none">
-                    <button onclick="filterTasks('all')" id="btnTaskAll" class="px-2.5 py-1 rounded bg-slate-800 text-slate-100 whitespace-nowrap">Todas</button>
-                    <button onclick="filterTasks('main')" id="btnTaskMain" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Cantor (Principal)</button>
-                    <button onclick="filterTasks('alter')" id="btnTaskAlter" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Sorcerer (Alter)</button>
-                    <button onclick="filterTasks('clan')" id="btnTaskClan" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap">Clan</button>
-                </div>
-
-                <!-- Checklist List -->
-                <div id="taskList" class="flex flex-col gap-2 max-h-[460px] overflow-y-auto pr-1">
-                    <!-- Dynamic Tasks Rendered Here -->
-                </div>
-
-                <!-- Custom Notes Section -->
-                <div class="mt-2 border-t border-slate-800 pt-3">
-                    <label for="userNotes" class="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1">
-                        <i class="fa-solid fa-pen-to-square text-aion-cyan"></i> Notas Rápidas & Recordatorios
-                    </label>
-                    <textarea id="userNotes" oninput="saveNotes()" rows="3" placeholder="Ej: Guardar 50 briznas para el casco, coordinar dps con la legión..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-aion-cyan transition placeholder-slate-600 resize-none"></textarea>
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Modal: Add Custom Task -->
-    <div id="addTaskModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            <h3 class="font-cinzel text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-plus-circle text-aion-gold"></i> Añadir Nueva Tarea Diaria
-            </h3>
-            
-            <div class="flex flex-col gap-4">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Nombre de la Misión / Tarea</label>
-                    <input type="text" id="newTaskName" placeholder="Ej: Farmeo de Briznas Nivel 40" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-aion-cyan">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Categoría / Personaje</label>
-                    <select id="newTaskCategory" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-aion-cyan">
-                        <option value="main">Cantor (Principal)</option>
-                        <option value="alter">Sorcerer (Alter)</option>
-                        <option value="clan">Legión / Clan</option>
-                        <option value="general">General / Varios</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Detalles / Recompensas (Opcional)</label>
-                    <input type="text" id="newTaskReward" placeholder="Ej: Exp + 15 briznas de energía" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-aion-cyan">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 mt-6">
-                <button onclick="closeAddTaskModal()" class="px-4 py-2 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Cancelar</button>
-                <button onclick="addNewTask()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">Añadir Tarea</button>
-            </div>
-        </div>
+  <div class="grid">
+    <!-- SPACES TIME RIFT CARD -->
+    <div class="card">
+      <div class="card-title">
+        <span>GRIETAS ESPACIO-TIEMPO</span>
+        <span id="rift-badge" class="status-badge status-closed">Cerradas</span>
+      </div>
+      <div class="info-sub">Ciclo cada 3 Horas (UTC) • Ventana de 10 Minutos</div>
+      <div class="timer-display" id="rift-timer">00:00:00</div>
+      <div class="info-sub" id="rift-next-info">Siguiente Apertura: --:-- UTC</div>
     </div>
 
-    <!-- Audio Synth Notification Handler Script -->
-    <script>
-        // --- DATA STRUCTURES ---
+    <!-- DAILY CHECKLIST CARD -->
+    <div class="card">
+      <div class="card-title">
+        <span>TAREAS DIARIAS</span>
+        <span style="font-size: 0.85rem;" id="progress-percent">0%</span>
+      </div>
+      <div class="controls" style="margin-bottom: 10px;">
+        <button class="filter-btn active" onclick="filterTasks('all', this)">Todas</button>
+        <button class="filter-btn" onclick="filterTasks('cantor', this)">Cantor</button>
+        <button class="filter-btn" onclick="filterTasks('sorcerer', this)">Sorcerer</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="task-progress"></div></div>
+      <ul class="task-list" id="task-list" style="margin-top: 15px;"></ul>
+    </div>
 
-        // World Bosses Preset Data (Aion 2 Custom Schedules/Cooldowns in minutes)
-        const bossData = [
-            { id: 'boss_1', name: 'Nazaul el Devorador', level: 35, zone: 'Garmon Pass', respawnIntervalMinutes: 120, lastKilled: null, icon: 'fa-dragon' },
-            { id: 'boss_2', name: 'Kardesh Sombraluna', level: 42, zone: 'Reserva de Tiamat', respawnIntervalMinutes: 180, lastKilled: null, icon: 'fa-skull' },
-            { id: 'boss_3', name: 'Anurok de Acero', level: 48, zone: 'Valle de Abyss', respawnIntervalMinutes: 90, lastKilled: null, icon: 'fa-robot' },
-            { id: 'boss_4', name: 'Reina Harpyia Vaxia', level: 50, zone: 'Cresta de Viento', respawnIntervalMinutes: 240, lastKilled: null, icon: 'fa-crow' },
-            { id: 'boss_5', name: 'Señor de las Grietas', level: 55, zone: 'Core Celestial', respawnIntervalMinutes: 300, lastKilled: null, icon: 'fa-ghost' }
-        ];
+    <!-- FIELD BOSSES CARD -->
+    <div class="card">
+      <div class="card-title">
+        <span>JEFES DE MAPA</span>
+        <span style="font-size: 0.8rem; color: var(--text-dim);">Respawn QuestLog</span>
+      </div>
+      <div id="boss-list"></div>
+    </div>
+  </div>
 
-        // Default Daily Tasks Preset
-        const defaultTasks = [
-            { id: 't1', title: 'Mazmorra Diaria de Escolta', category: 'main', reward: 'Monedas de Exp & Equipamiento', completed: false },
-            { id: 't2', title: 'Misiones de Legión / Clan', category: 'clan', reward: 'Puntos de Gremio & Buffs', completed: false },
-            { id: 't3', title: 'Farmeo de Briznas con Sorcerer (Alter)', category: 'alter', reward: 'Recursos para artesanía', completed: false },
-            { id: 't4', title: 'Recolecta de Materiales de Artesanía', category: 'alter', reward: 'Esteras & Minerales', completed: false },
-            { id: 't5', title: 'Rotación PvP de Grietas (Rifts)', category: 'main', reward: 'Puntos de Abismo', completed: false },
-            { id: 't6', title: 'Misiones de Tablón de Anuncios', category: 'main', reward: 'Experiencia & Oro', completed: false }
-        ];
+  <script>
+    // Audio and Notifications
+    let audioEnabled = false;
+    let notifPermitted = false;
+    const RIFT_INTERVAL_HOURS = 3;
+    const RIFT_WINDOW_MINUTES = 10;
+    const RIFT_HOURS_UTC = [2, 5, 8, 11, 14, 17, 20, 23];
 
-        // --- APP STATE ---
-        let tasks = [];
-        let bosses = [];
-        let audioEnabled = true;
-        let notifEnabled = false;
-        let activeBossFilter = 'all';
-        let activeTaskFilter = 'all';
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btn-audio');
+      btn.innerText = audioEnabled ? "🔊 Audio: Activado" : "🔊 Audio: Desactivado";
+      btn.classList.toggle('active', audioEnabled);
+      if(audioEnabled) playBeep();
+    }
 
-        // --- INITIALIZATION ---
-        window.addEventListener('DOMContentLoaded', () => {
-            loadLocalStorage();
-            renderTasks();
-            renderBosses();
-            setupNotes();
-
-            // Main loop ticker (runs every second)
-            setInterval(tick, 1000);
-            tick();
+    function requestNotifPermission() {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            notifPermitted = true;
+            document.getElementById('btn-notif').innerText = "🔔 Notificaciones: OK";
+            document.getElementById('btn-notif').classList.add('active');
+          }
         });
+      }
+    }
 
-        // --- LOCAL STORAGE LOGIC ---
-        function loadLocalStorage() {
-            // Load Tasks
-            const savedTasks = localStorage.getItem('aion2_tasks');
-            tasks = savedTasks ? JSON.parse(savedTasks) : [...defaultTasks];
+    function playBeep() {
+      if (!audioEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch(e) {}
+    }
 
-            // Load Bosses Timestamps
-            const savedBosses = localStorage.getItem('aion2_bosses');
-            if (savedBosses) {
-                const parsed = JSON.parse(savedBosses);
-                bosses = bossData.map(b => {
-                    const match = parsed.find(p => p.id === b.id);
-                    return { ...b, lastKilled: match ? match.lastKilled : null };
-                });
-            } else {
-                bosses = bossData.map(b => ({ ...b, lastKilled: null }));
-            }
+    function sendNotification(title, body) {
+      if (notifPermitted && Notification.permission === 'granted') {
+        new Notification(title, { body, icon: 'https://questlog.gg/favicon.ico' });
+      }
+      playBeep();
+    }
 
-            // Check Daily Reset Trigger
-            const lastReset = localStorage.getItem('aion2_last_reset');
-            const todayReset = getTodayResetTime().getTime();
-            if (!lastReset || parseInt(lastReset) < todayReset) {
-                // Auto reset tasks on new server day
-                tasks.forEach(t => t.completed = false);
-                localStorage.setItem('aion2_last_reset', Date.now().toString());
-                saveTasks();
-            }
+    // Rift Logic (Exact Sync with QuestLog UTC)
+    let lastRiftState = null;
+
+    function updateRifts() {
+      const now = new Date();
+      const currentUTCHour = now.getUTCHours();
+      const currentUTCMin = now.getUTCMinutes();
+      const currentUTCSec = now.getUTCSeconds();
+
+      // Find current or next rift hour
+      let nextRiftHour = RIFT_HOURS_UTC.find(h => h > currentUTCHour || (h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES));
+      let isNextDay = false;
+
+      if (nextRiftHour === undefined) {
+        nextRiftHour = RIFT_HOURS_UTC[0];
+        isNextDay = true;
+      }
+
+      // Check if inside 10-min window
+      const activeRiftHour = RIFT_HOURS_UTC.find(h => h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES);
+      const isOpen = activeRiftHour !== undefined;
+
+      const badge = document.getElementById('rift-badge');
+      const timerElem = document.getElementById('rift-timer');
+      const nextInfo = document.getElementById('rift-next-info');
+
+      if (isOpen) {
+        badge.className = 'status-badge status-open';
+        badge.innerText = '¡GRIETA ABIERTA!';
+        
+        const remainingSecs = (RIFT_WINDOW_MINUTES * 60) - (currentUTCMin * 60 + currentUTCSec);
+        timerElem.innerText = formatSeconds(remainingSecs);
+        nextInfo.innerText = `Cierra a las ${String(activeRiftHour).padStart(2, '0')}:${String(RIFT_WINDOW_MINUTES).padStart(2, '0')} UTC`;
+
+        if (lastRiftState !== 'open') {
+          sendNotification('AION 2: Grieta Abierta', '¡La Grieta del Espacio-Tiempo está disponible durante 10 minutos!');
+          lastRiftState = 'open';
+        }
+      } else {
+        badge.className = 'status-badge status-closed';
+        badge.innerText = 'Grietas Cerradas';
+
+        const targetDate = new Date(Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + (isNextDay ? 1 : 0),
+          nextRiftHour, 0, 0
+        ));
+
+        const diffSecs = Math.floor((targetDate - now) / 1000);
+        timerElem.innerText = formatSeconds(diffSecs);
+        nextInfo.innerText = `Siguiente Apertura: ${String(nextRiftHour).padStart(2, '0')}:00 UTC`;
+
+        if (lastRiftState !== 'closed') {
+          lastRiftState = 'closed';
         }
 
-        function saveTasks() {
-            localStorage.setItem('aion2_tasks', JSON.stringify(tasks));
-            updateProgress();
+        // 5 minute warning
+        if (diffSecs === 300) {
+          sendNotification('AION 2: Grieta Próxima', '¡Quedan 5 minutos para la apertura de la Grieta!');
         }
-
-        function saveBosses() {
-            localStorage.setItem('aion2_bosses', JSON.stringify(bosses.map(b => ({ id: b.id, lastKilled: b.lastKilled }))));
-        }
-
-        function setupNotes() {
-            const savedNotes = localStorage.getItem('aion2_notes') || '';
-            document.getElementById('userNotes').value = savedNotes;
-        }
-
-        function saveNotes() {
-            const notes = document.getElementById('userNotes').value;
-            localStorage.setItem('aion2_notes', notes);
-        }
-
-        // --- MAIN TICK LOOP ---
-        function tick() {
-            const now = new Date();
-
-            // Update Server Clock (UTC)
-            document.getElementById('serverTime').textContent = now.toUTCString().split(' ')[4];
-
-            // Update Rift Tracker
-            updateRiftTracker(now);
-
-            // Update Bosses Countdowns
-            updateBossTimers(now);
-
-            // Update Server Reset Countdown
-            updateResetCountdown(now);
-        }
-
-        // --- SPACETIME RIFT LOGIC ---
-        // Spacetime Rift Opens every 2 hours at even hours (00:00, 02:00, 04:00 ... UTC) for 30 min.
-        function updateRiftTracker(now) {
-            const currentHour = now.getUTCHours();
-            const currentMin = now.getUTCMinutes();
-            const currentSec = now.getUTCSeconds();
-
-            const isEvenHour = currentHour % 2 === 0;
-            const isOpen = isEvenHour && currentMin < 30;
-
-            const badge = document.getElementById('riftBadge');
-            const statusText = document.getElementById('riftStatusText');
-            const countdownEl = document.getElementById('riftCountdown');
-
-            if (isOpen) {
-                // Rift is active right now!
-                badge.className = "self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-aion-cyan border border-cyan-500/50 flex items-center gap-1.5 animate-pulse";
-                statusText.textContent = "¡GRIETA ABIERTA EN VIVO!";
-
-                // Remaining time until rift closes
-                const minsLeft = 29 - currentMin;
-                const secsLeft = 59 - currentSec;
-                countdownEl.textContent = `${pad(minsLeft)}:${pad(secsLeft)}`;
-                countdownEl.className = "font-mono text-2xl sm:text-3xl font-extrabold text-emerald-400 glow-title";
-
-                // Audio warning at start
-                if (currentMin === 0 && currentSec === 0) {
-                    triggerAlert("¡Las Grietas del Espacio-Tiempo se han abierto!", "rift");
-                }
-            } else {
-                // Rift is closed, calculate next opening
-                badge.className = "self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5";
-                statusText.textContent = "Grietas Cerradas";
-
-                let targetHour = isEvenHour ? currentHour + 2 : currentHour + 1;
-                let targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), targetHour, 0, 0));
-
-                const diffMs = targetDate - now;
-                const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-                countdownEl.textContent = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
-                countdownEl.className = "font-mono text-2xl sm:text-3xl font-extrabold text-aion-cyan glow-title";
-
-                // Warning 5 minutes before opening
-                if (hours === 0 && mins === 5 && secs === 0) {
-                    triggerAlert("Quedan 5 minutos para la apertura de Grietas Espacio-Tiempo.", "rift");
-                }
-            }
-        }
-
-        // --- WORLD BOSS TIMERS ---
-        function updateBossTimers(now) {
-            bosses.forEach(boss => {
-                const timerEl = document.getElementById(`timer_${boss.id}`);
-                const statusBadgeEl = document.getElementById(`status_${boss.id}`);
-                const cardEl = document.getElementById(`card_${boss.id}`);
-
-                if (!timerEl || !statusBadgeEl) return;
-
-                if (!boss.lastKilled) {
-                    // Default state: Available
-                    timerEl.textContent = "¡LISTO PARA CAZAR!";
-                    timerEl.className = "text-xs font-bold text-emerald-400";
-                    statusBadgeEl.textContent = "SPAWNEADO";
-                    statusBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                    return;
-                }
-
-                const nextSpawn = boss.lastKilled + (boss.respawnIntervalMinutes * 60 * 1000);
-                const diffMs = nextSpawn - now.getTime();
-
-                if (diffMs <= 0) {
-                    timerEl.textContent = "¡LISTO PARA CAZAR!";
-                    timerEl.className = "text-xs font-bold text-emerald-400";
-                    statusBadgeEl.textContent = "SPAWNEADO";
-                    statusBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                } else {
-                    const mins = Math.floor(diffMs / (1000 * 60));
-                    const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-                    timerEl.textContent = `Respawn: ${pad(mins)}m ${pad(secs)}s`;
-                    
-                    if (mins < 15) {
-                        timerEl.className = "text-xs font-bold text-amber-400 animate-pulse";
-                        statusBadgeEl.textContent = "EN CAMINO";
-                        statusBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
-                    } else {
-                        timerEl.className = "text-xs font-medium text-slate-400";
-                        statusBadgeEl.textContent = "EN COOLDOWN";
-                        statusBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-500 border border-slate-700";
-                    }
-
-                    // Alert when spawned
-                    if (mins === 0 && secs === 0) {
-                        triggerAlert(`¡El Boss ${boss.name} ha aparecido en ${boss.zone}!`, "boss");
-                    }
-                }
-            });
-        }
-
-        function markBossKilled(bossId) {
-            const boss = bosses.find(b => b.id === bossId);
-            if (boss) {
-                boss.lastKilled = Date.now();
-                saveBosses();
-                updateBossTimers(new Date());
-            }
-        }
-
-        function resetBossTimer(bossId) {
-            const boss = bosses.find(b => b.id === bossId);
-            if (boss) {
-                boss.lastKilled = null;
-                saveBosses();
-                updateBossTimers(new Date());
-            }
-        }
-
-        function renderBosses() {
-            const container = document.getElementById('bossesGrid');
-            container.innerHTML = '';
-
-            bosses.forEach(boss => {
-                const card = document.createElement('div');
-                card.id = `card_${boss.id}`;
-                card.className = "bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition shadow-sm relative overflow-hidden";
-                
-                card.innerHTML = `
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center text-aion-gold">
-                                <i class="fa-solid ${boss.icon} text-lg"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
-                                    ${boss.name}
-                                    <span class="text-[10px] text-slate-400 font-normal">Niv.${boss.level}</span>
-                                </h3>
-                                <p class="text-[11px] text-slate-400"><i class="fa-solid fa-map-pin text-slate-500"></i> ${boss.zone}</p>
-                            </div>
-                        </div>
-                        <span id="status_${boss.id}" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-500">Calculando</span>
-                    </div>
-
-                    <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                        <span id="timer_${boss.id}" class="text-xs font-medium text-slate-400">Cargando...</span>
-                        
-                        <div class="flex items-center gap-1">
-                            <button onclick="markBossKilled('${boss.id}')" title="Marcar Derrotado / Iniciar Respawn" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition border border-slate-700">
-                                <i class="fa-solid fa-skull-crossbones text-rose-400"></i>
-                            </button>
-                            <button onclick="resetBossTimer('${boss.id}')" title="Restablecer como Disponible" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs transition border border-slate-700">
-                                <i class="fa-solid fa-rotate-left"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
-        }
-
-        function filterBosses(filter) {
-            activeBossFilter = filter;
-            document.getElementById('btnFilterAll').className = filter === 'all' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 font-medium transition" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 transition";
-            document.getElementById('btnFilterActive').className = filter === 'active' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 font-medium transition" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 transition";
-            document.getElementById('btnFilterSoon').className = filter === 'soon' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 font-medium transition" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 transition";
-
-            const now = Date.now();
-            bosses.forEach(boss => {
-                const card = document.getElementById(`card_${boss.id}`);
-                if (!card) return;
-
-                const isAvailable = !boss.lastKilled || (boss.lastKilled + boss.respawnIntervalMinutes * 60 * 1000) <= now;
-                const nextSpawn = boss.lastKilled ? boss.lastKilled + boss.respawnIntervalMinutes * 60 * 1000 : now;
-                const diffMins = (nextSpawn - now) / (1000 * 60);
-
-                if (filter === 'all') {
-                    card.classList.remove('hidden');
-                } else if (filter === 'active' && isAvailable) {
-                    card.classList.remove('hidden');
-                } else if (filter === 'soon' && !isAvailable && diffMins <= 30) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-        }
-
-        // --- CHECKLIST & TASKS LOGIC ---
-        function renderTasks() {
-            const list = document.getElementById('taskList');
-            list.innerHTML = '';
-
-            const filtered = tasks.filter(t => {
-                if (activeTaskFilter === 'all') return true;
-                return t.category === activeTaskFilter;
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = `<p class="text-center text-xs text-slate-500 py-6">No hay tareas en esta categoría.</p>`;
-                updateProgress();
-                return;
-            }
-
-            filtered.forEach(task => {
-                const item = document.createElement('div');
-                item.className = `p-3 rounded-xl border ${task.completed ? 'bg-slate-950/40 border-slate-800/60 opacity-60' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'} flex items-center justify-between gap-3 transition group`;
-
-                const categoryTag = getCategoryBadge(task.category);
-
-                item.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        <button onclick="toggleTask('${task.id}')" class="w-5 h-5 rounded border ${task.completed ? 'bg-aion-cyan border-aion-cyan text-slate-950' : 'border-slate-700 bg-slate-900'} flex items-center justify-center transition">
-                            ${task.completed ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-                        </button>
-                        <div class="min-w-0">
-                            <p class="text-xs font-medium ${task.completed ? 'line-through text-slate-500' : 'text-slate-200'} truncate">${task.title}</p>
-                            <p class="text-[10px] text-slate-400 truncate flex items-center gap-1 mt-0.5">
-                                ${categoryTag}
-                                <span>${task.reward || ''}</span>
-                            </p>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask('${task.id}')" class="text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition p-1">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
-                `;
-
-                list.appendChild(item);
-            });
-
-            updateProgress();
-        }
-
-        function getCategoryBadge(cat) {
-            switch(cat) {
-                case 'main': return `<span class="px-1.5 py-0.2 rounded bg-cyan-500/10 text-aion-cyan border border-cyan-500/20 text-[9px] font-semibold">Cantor</span>`;
-                case 'alter': return `<span class="px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-semibold">Sorcerer</span>`;
-                case 'clan': return `<span class="px-1.5 py-0.2 rounded bg-amber-500/10 text-aion-gold border border-amber-500/20 text-[9px] font-semibold">Legión</span>`;
-                default: return `<span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 text-[9px]">General</span>`;
-            }
-        }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveTasks();
-                renderTasks();
-            }
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveTasks();
-            renderTasks();
-        }
-
-        function resetAllTasks() {
-            tasks.forEach(t => t.completed = false);
-            saveTasks();
-            renderTasks();
-        }
-
-        function filterTasks(cat) {
-            activeTaskFilter = cat;
-            document.getElementById('btnTaskAll').className = cat === 'all' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 whitespace-nowrap font-medium" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap";
-            document.getElementById('btnTaskMain').className = cat === 'main' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 whitespace-nowrap font-medium" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap";
-            document.getElementById('btnTaskAlter').className = cat === 'alter' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 whitespace-nowrap font-medium" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap";
-            document.getElementById('btnTaskClan').className = cat === 'clan' ? "px-2.5 py-1 rounded bg-slate-800 text-slate-100 whitespace-nowrap font-medium" : "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 whitespace-nowrap";
-            renderTasks();
-        }
-
-        function updateProgress() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-
-            document.getElementById('progressPercentage').textContent = `${percentage}%`;
-            document.getElementById('progressBar').style.width = `${percentage}%`;
-            document.getElementById('completedCount').textContent = `${completed} / ${total} Completadas`;
-        }
-
-        // --- TASK MODAL ACTIONS ---
-        function openAddTaskModal() {
-            document.getElementById('addTaskModal').classList.remove('hidden');
-        }
-
-        function closeAddTaskModal() {
-            document.getElementById('addTaskModal').classList.add('hidden');
-            document.getElementById('newTaskName').value = '';
-            document.getElementById('newTaskReward').value = '';
-        }
-
-        function addNewTask() {
-            const title = document.getElementById('newTaskName').value.trim();
-            const category = document.getElementById('newTaskCategory').value;
-            const reward = document.getElementById('newTaskReward').value.trim();
-
-            if (!title) return;
-
-            const newTask = {
-                id: 'custom_' + Date.now(),
-                title,
-                category,
-                reward,
-                completed: false
-            };
-
-            tasks.push(newTask);
-            saveTasks();
-            renderTasks();
-            closeAddTaskModal();
-        }
-
-        // --- SERVER RESET COUNTDOWN ---
-        function getTodayResetTime() {
-            const now = new Date();
-            // Assuming 00:00 UTC Reset
-            return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
-        }
-
-        function updateResetCountdown(now) {
-            const resetTime = getTodayResetTime();
-            const diffMs = resetTime - now;
-
-            const hours = Math.floor(diffMs / (1000 * 60 * 60));
-            const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-            document.getElementById('resetCountdown').textContent = `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
-        }
-
-        // --- AUDIO & WEB NOTIFICATIONS ---
-        function toggleAudio() {
-            audioEnabled = !audioEnabled;
-            const icon = document.getElementById('audioIcon');
-            const text = document.getElementById('audioText');
-
-            if (audioEnabled) {
-                icon.className = "fa-solid fa-volume-high text-aion-cyan";
-                text.textContent = "Audio Activo";
-            } else {
-                icon.className = "fa-solid fa-volume-xmark text-slate-500";
-                text.textContent = "Audio Mute";
-            }
-        }
-
-        function requestNotificationPermission() {
-            if (!("Notification" in window)) {
-                alert("Este navegador no soporta notificaciones de escritorio.");
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                const icon = document.getElementById('notifIcon');
-                const text = document.getElementById('notifText');
-
-                if (permission === "granted") {
-                    notifEnabled = true;
-                    icon.className = "fa-solid fa-bell text-emerald-400";
-                    text.textContent = "Avisos Activos";
-                    new Notification("Aion 2 Organizer", { body: "Notificaciones activadas con éxito." });
-                } else {
-                    notifEnabled = false;
-                    icon.className = "fa-solid fa-bell-slash text-slate-500";
-                    text.textContent = "Avisos Bloqueados";
-                }
-            });
-        }
-
-        function triggerAlert(message, type = "boss") {
-            // Audio Web Speech Synthesis / Beep
-            if (audioEnabled) {
-                if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(message);
-                    utterance.lang = 'es-ES';
-                    speechSynthesis.speak(utterance);
-                }
-            }
-
-            // Web Notification
-            if (notifEnabled && Notification.permission === "granted") {
-                new Notification("Alerta AION 2", {
-                    body: message,
-                    icon: "https://placehold.co/128x128/0e172a/00d8ff?text=AION+2"
-                });
-            }
-        }
-
-        // Helper Utility
-        function pad(num) {
-            return num < 10 ? '0' + num : num;
-        }
-    </script>
+      }
+    }
+
+    function formatSeconds(secs) {
+      const h = Math.floor(secs / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      const s = secs % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // Tasks Management
+    const defaultTasks = [
+      { id: 1, text: 'Mazmorra Diaria de Escolta', char: 'cantor', done: false },
+      { id: 2, text: 'Misiones de Legión / Clan', char: 'cantor', done: false },
+      { id: 3, text: 'Rotación PvP de Grietas (Rifts)', char: 'cantor', done: false },
+      { id: 4, text: 'Farmeo de Briznas con Sorcerer', char: 'sorcerer', done: false },
+      { id: 5, text: 'Recolecta de Materiales de Artesanía', char: 'sorcerer', done: false },
+      { id: 6, text: 'Misiones de Tablón de Anuncios', char: 'cantor', done: false }
+    ];
+
+    let tasks = JSON.parse(localStorage.getItem('aion2_tasks')) || defaultTasks;
+    let currentFilter = 'all';
+
+    function renderTasks() {
+      const list = document.getElementById('task-list');
+      list.innerHTML = '';
+
+      const filtered = tasks.filter(t => currentFilter === 'all' || t.char === currentFilter);
+      let completedCount = tasks.filter(t => t.done).length;
+
+      filtered.forEach(task => {
+        const li = document.createElement('li');
+        li.className = `task-item ${task.done ? 'completed' : ''}`;
+        li.innerHTML = `
+          <label>
+            <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})">
+            <span>${task.text}</span>
+          </label>
+          <span class="char-tag ${task.char === 'cantor' ? 'tag-cantor' : 'tag-sorcerer'}">${task.char.toUpperCase()}</span>
+        `;
+        list.appendChild(li);
+      });
+
+      const pct = Math.round((completedCount / tasks.length) * 100) || 0;
+      document.getElementById('task-progress').style.width = `${pct}%`;
+      document.getElementById('progress-percent').innerText = `${pct}%`;
+      localStorage.setItem('aion2_tasks', JSON.stringify(tasks));
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      renderTasks();
+    }
+
+    function filterTasks(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTasks();
+    }
+
+    // Bosses Mock/Track
+    const bosses = [
+      { name: 'Nazaul el Devorador', zone: 'Garmon Pass', respawnMins: 120 },
+      { name: 'Kardesh Sombraluna', zone: 'Reserva de Tiamat', respawnMins: 180 },
+      { name: 'Reina Harpyia Vaxia', zone: 'Cresta de Viento', respawnMins: 240 }
+    ];
+
+    function renderBosses() {
+      const container = document.getElementById('boss-list');
+      container.innerHTML = bosses.map(b => `
+        <div class="boss-item">
+          <div class="boss-info">
+            <h4>${b.name}</h4>
+            <p>${b.zone} • Respawn cada ${b.respawnMins}m</p>
+          </div>
+          <div class="boss-timer">DISPONIBLE</div>
+        </div>
+      `).join('');
+    }
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('utc-clock').innerText = `UTC: ${now.toUTCString().split(' ')[4]}`;
+      updateRifts();
+    }
+
+    setInterval(updateClock, 1000);
+    renderTasks();
+    renderBosses();
+    updateClock();
+  </script>
 </body>
 </html>
