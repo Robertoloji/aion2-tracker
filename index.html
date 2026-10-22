@@ -19,13 +19,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); padding: 20px; max-width: 1200px; margin: 0 auto; }
 
-    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222B38; padding-bottom: 15px; margin-bottom: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222B38; padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     h1 { font-size: 1.5rem; letter-spacing: 1px; color: var(--accent-blue); text-transform: uppercase; }
-    .utc-clock { font-family: monospace; font-size: 1rem; color: var(--accent-blue); background: #1A222D; padding: 6px 12px; border-radius: 6px; border: 1px solid #2A3644; }
+    .utc-clock { font-family: monospace; font-size: 0.95rem; color: var(--accent-blue); background: #1A222D; padding: 6px 12px; border-radius: 6px; border: 1px solid #2A3644; text-align: right; }
 
-    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    button { background: #1F2833; color: var(--text-main); border: 1px solid #334253; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-    button:hover { background: #2A3644; border-color: var(--accent-blue); }
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    button, select { background: #1F2833; color: var(--text-main); border: 1px solid #334253; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+    button:hover, select:hover { background: #2A3644; border-color: var(--accent-blue); }
     button.active { background: var(--accent-blue); color: #000; font-weight: bold; border-color: var(--accent-blue); }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
@@ -33,7 +33,7 @@
     .card-title { font-size: 1.1rem; color: var(--accent-blue); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222B38; padding-bottom: 8px; }
 
     /* Rifts Section */
-    .timer-display { font-size: 2.5rem; font-weight: bold; font-family: monospace; text-align: center; margin: 15px 0; color: var(--text-main); }
+    .timer-display { font-size: 2.8rem; font-weight: bold; font-family: monospace; text-align: center; margin: 15px 0; color: var(--text-main); text-shadow: 0 0 12px rgba(0, 210, 255, 0.3); }
     .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
     .status-open { background: rgba(0, 255, 135, 0.15); color: var(--status-open); border: 1px solid var(--status-open); }
     .status-closed { background: rgba(255, 0, 85, 0.15); color: var(--status-closed); border: 1px solid var(--status-closed); }
@@ -53,7 +53,7 @@
     .boss-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1C2430; }
     .boss-info h4 { font-size: 0.95rem; }
     .boss-info p { font-size: 0.8rem; color: var(--text-dim); }
-    .boss-timer { font-family: monospace; font-size: 1rem; color: var(--accent-blue); }
+    .boss-timer { font-family: monospace; font-size: 0.9rem; color: var(--accent-blue); }
 
     .progress-bar { width: 100%; height: 6px; background: #1F2833; border-radius: 3px; overflow: hidden; margin-top: 15px; }
     .progress-fill { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.3s; }
@@ -63,15 +63,23 @@
 
   <header>
     <div>
-      <h1>AION 2 Tracker</h1>
+      <h1>AION 2 HUB</h1>
       <span style="font-size: 0.8rem; color: var(--text-dim);">Sincronizado con QuestLog.gg</span>
     </div>
-    <div class="utc-clock" id="utc-clock">UTC: --:--:--</div>
+    <div class="utc-clock" id="utc-clock">
+      <div>UTC: --:--:--</div>
+      <div style="font-size: 0.75rem; color: var(--text-dim);" id="local-clock">Local: --:--:--</div>
+    </div>
   </header>
 
   <div class="controls">
     <button id="btn-audio" onclick="toggleAudio()">🔊 Audio: Desactivado</button>
     <button id="btn-notif" onclick="requestNotifPermission()">🔔 Notificaciones</button>
+    <select id="region-select" onchange="changeRegion()">
+      <option value="EU">Servidor: EU (02:00, 05:00, 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 UTC)</option>
+      <option value="NA">Servidor: NA West (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00, 22:00 UTC)</option>
+      <option value="ASIA">Servidor: KR / TW (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC)</option>
+    </select>
   </div>
 
   <div class="grid">
@@ -81,7 +89,7 @@
         <span>GRIETAS ESPACIO-TIEMPO</span>
         <span id="rift-badge" class="status-badge status-closed">Cerradas</span>
       </div>
-      <div class="info-sub">Ciclo cada 3 Horas (UTC) • Ventana de 10 Minutos</div>
+      <div class="info-sub">Ciclo cada 3 Horas • Ventana de 10 Minutos</div>
       <div class="timer-display" id="rift-timer">00:00:00</div>
       <div class="info-sub" id="rift-next-info">Siguiente Apertura: --:-- UTC</div>
     </div>
@@ -112,19 +120,29 @@
   </div>
 
   <script>
-    // Audio and Notifications
     let audioEnabled = false;
     let notifPermitted = false;
-    const RIFT_INTERVAL_HOURS = 3;
     const RIFT_WINDOW_MINUTES = 10;
-    const RIFT_HOURS_UTC = [2, 5, 8, 11, 14, 17, 20, 23];
+    
+    // Regiones QuestLog.gg con horas UTC exactas
+    const REGION_SCHEDULES = {
+      EU: [2, 5, 8, 11, 14, 17, 20, 23],
+      NA: [1, 4, 7, 10, 13, 16, 19, 22],
+      ASIA: [0, 3, 6, 9, 12, 15, 18, 21]
+    };
+
+    let selectedRegion = 'EU';
+
+    function changeRegion() {
+      selectedRegion = document.getElementById('region-select').value;
+      updateRifts();
+    }
 
     function toggleAudio() {
       audioEnabled = !audioEnabled;
       const btn = document.getElementById('btn-audio');
       btn.innerText = audioEnabled ? "🔊 Audio: Activado" : "🔊 Audio: Desactivado";
       btn.classList.toggle('active', audioEnabled);
-      if(audioEnabled) playBeep();
     }
 
     function requestNotifPermission() {
@@ -139,46 +157,15 @@
       }
     }
 
-    function playBeep() {
-      if (!audioEnabled) return;
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch(e) {}
-    }
-
-    function sendNotification(title, body) {
-      if (notifPermitted && Notification.permission === 'granted') {
-        new Notification(title, { body, icon: 'https://questlog.gg/favicon.ico' });
-      }
-      playBeep();
-    }
-
-    // Rift Logic (Exact Sync with QuestLog UTC)
-    let lastRiftState = null;
-
     function updateRifts() {
       const now = new Date();
+      const hours = REGION_SCHEDULES[selectedRegion];
       const currentUTCHour = now.getUTCHours();
       const currentUTCMin = now.getUTCMinutes();
       const currentUTCSec = now.getUTCSeconds();
 
-      // Find current or next rift hour
-      let nextRiftHour = RIFT_HOURS_UTC.find(h => h > currentUTCHour || (h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES));
-      let isNextDay = false;
-
-      if (nextRiftHour === undefined) {
-        nextRiftHour = RIFT_HOURS_UTC[0];
-        isNextDay = true;
-      }
-
-      // Check if inside 10-min window
-      const activeRiftHour = RIFT_HOURS_UTC.find(h => h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES);
+      // Comprobar si la grieta está abierta (primeros 10 minutos de la hora programada)
+      const activeRiftHour = hours.find(h => h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES);
       const isOpen = activeRiftHour !== undefined;
 
       const badge = document.getElementById('rift-badge');
@@ -188,19 +175,30 @@
       if (isOpen) {
         badge.className = 'status-badge status-open';
         badge.innerText = '¡GRIETA ABIERTA!';
-        
         const remainingSecs = (RIFT_WINDOW_MINUTES * 60) - (currentUTCMin * 60 + currentUTCSec);
         timerElem.innerText = formatSeconds(remainingSecs);
-        nextInfo.innerText = `Cierra a las ${String(activeRiftHour).padStart(2, '0')}:${String(RIFT_WINDOW_MINUTES).padStart(2, '0')} UTC`;
-
-        if (lastRiftState !== 'open') {
-          sendNotification('AION 2: Grieta Abierta', '¡La Grieta del Espacio-Tiempo está disponible durante 10 minutos!');
-          lastRiftState = 'open';
-        }
+        
+        const localCloseTime = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), activeRiftHour, RIFT_WINDOW_MINUTES, 0));
+        const localCloseStr = localCloseTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        nextInfo.innerText = `Cierra a las ${String(activeRiftHour).padStart(2, '0')}:${String(RIFT_WINDOW_MINUTES).padStart(2, '0')} UTC (${localCloseStr} Tu Hora)`;
       } else {
         badge.className = 'status-badge status-closed';
         badge.innerText = 'Grietas Cerradas';
 
+        // Buscar la PRÓXIMA hora futura en el ciclo
+        let nextRiftHour = hours.find(h => {
+          if (h > currentUTCHour) return true;
+          if (h === currentUTCHour && currentUTCMin < RIFT_WINDOW_MINUTES) return true;
+          return false;
+        });
+
+        let isNextDay = false;
+        if (nextRiftHour === undefined) {
+          nextRiftHour = hours[0];
+          isNextDay = true;
+        }
+
+        // Crear la fecha objetivo UTC exacta
         const targetDate = new Date(Date.UTC(
           now.getUTCFullYear(),
           now.getUTCMonth(),
@@ -208,18 +206,11 @@
           nextRiftHour, 0, 0
         ));
 
-        const diffSecs = Math.floor((targetDate - now) / 1000);
+        const diffSecs = Math.max(0, Math.floor((targetDate.getTime() - now.getTime()) / 1000));
         timerElem.innerText = formatSeconds(diffSecs);
-        nextInfo.innerText = `Siguiente Apertura: ${String(nextRiftHour).padStart(2, '0')}:00 UTC`;
 
-        if (lastRiftState !== 'closed') {
-          lastRiftState = 'closed';
-        }
-
-        // 5 minute warning
-        if (diffSecs === 300) {
-          sendNotification('AION 2: Grieta Próxima', '¡Quedan 5 minutos para la apertura de la Grieta!');
-        }
+        const localTimeStr = targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        nextInfo.innerText = `Siguiente Apertura: ${String(nextRiftHour).padStart(2, '0')}:00 UTC (${localTimeStr} Tu Hora)`;
       }
     }
 
@@ -230,7 +221,6 @@
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    // Tasks Management
     const defaultTasks = [
       { id: 1, text: 'Mazmorra Diaria de Escolta', char: 'cantor', done: false },
       { id: 2, text: 'Misiones de Legión / Clan', char: 'cantor', done: false },
@@ -240,11 +230,17 @@
       { id: 6, text: 'Misiones de Tablón de Anuncios', char: 'cantor', done: false }
     ];
 
-    let tasks = JSON.parse(localStorage.getItem('aion2_tasks')) || defaultTasks;
+    let tasks = defaultTasks;
+    try {
+      const saved = localStorage.getItem('aion2_tasks');
+      if (saved) tasks = JSON.parse(saved);
+    } catch(e) {}
+
     let currentFilter = 'all';
 
     function renderTasks() {
       const list = document.getElementById('task-list');
+      if (!list) return;
       list.innerHTML = '';
 
       const filtered = tasks.filter(t => currentFilter === 'all' || t.char === currentFilter);
@@ -266,7 +262,7 @@
       const pct = Math.round((completedCount / tasks.length) * 100) || 0;
       document.getElementById('task-progress').style.width = `${pct}%`;
       document.getElementById('progress-percent').innerText = `${pct}%`;
-      localStorage.setItem('aion2_tasks', JSON.stringify(tasks));
+      try { localStorage.setItem('aion2_tasks', JSON.stringify(tasks)); } catch(e) {}
     }
 
     function toggleTask(id) {
@@ -281,30 +277,30 @@
       renderTasks();
     }
 
-    // Bosses Mock/Track
     const bosses = [
-      { name: 'Nazaul el Devorador', zone: 'Garmon Pass', respawnMins: 120 },
-      { name: 'Kardesh Sombraluna', zone: 'Reserva de Tiamat', respawnMins: 180 },
-      { name: 'Reina Harpyia Vaxia', zone: 'Cresta de Viento', respawnMins: 240 }
+      { name: 'Nazaul el Devorador', zone: 'Garmon Pass', time: 'Cada 2 Horas' },
+      { name: 'Kardesh Sombraluna', zone: 'Reserva de Tiamat', time: 'Cada 3 Horas' },
+      { name: 'Reina Harpyia Vaxia', zone: 'Cresta de Viento', time: 'Cada 4 Horas' }
     ];
 
     function renderBosses() {
       const container = document.getElementById('boss-list');
+      if (!container) return;
       container.innerHTML = bosses.map(b => `
         <div class="boss-item">
           <div class="boss-info">
             <h4>${b.name}</h4>
-            <p>${b.zone} • Respawn cada ${b.respawnMins}m</p>
+            <p>${b.zone} • ${b.time}</p>
           </div>
-          <div class="boss-timer">DISPONIBLE</div>
+          <div class="boss-timer">PROGRAMADO</div>
         </div>
       `).join('');
     }
 
-    // Clock
     function updateClock() {
       const now = new Date();
-      document.getElementById('utc-clock').innerText = `UTC: ${now.toUTCString().split(' ')[4]}`;
+      document.getElementById('utc-clock').children[0].innerText = `UTC: ${now.toUTCString().split(' ')[4]}`;
+      document.getElementById('local-clock').innerText = `Local: ${now.toLocaleTimeString()}`;
       updateRifts();
     }
 
